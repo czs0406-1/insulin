@@ -1,0 +1,8 @@
+{
+  "name": "Insulin: The Miracle Molecule - Interactive Pharmacy Hub",
+  "description": "An interactive educational platform exploring the discovery, mechanism, and clinical use of insulin through AI-powered storytelling and digital human pharmacy experts.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
