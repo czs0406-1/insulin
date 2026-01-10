@@ -24,14 +24,13 @@ const InteractiveExpert: React.FC = () => {
   }, [chatHistory, isTyping]);
 
   const processResponse = async (question: string, predefinedAnswer?: string, citation?: string) => {
-    if (isTyping) return;
+    if (isTyping || !question.trim()) return;
     
     setChatHistory(prev => [...prev, { role: 'user', content: question }]);
     setIsTyping(true);
     setTypingStatus('正在检索知识库...');
 
     if (predefinedAnswer) {
-      // 本地 FAQ 逻辑
       setTimeout(() => {
         setIsTyping(false);
         const prefix = personality === 'mentor' ? "【专家解析】： " : "温馨提醒： ";
@@ -40,29 +39,34 @@ const InteractiveExpert: React.FC = () => {
           content: prefix + predefinedAnswer,
           citation: citation
         }]);
-      }, 1000);
+      }, 800);
     } else {
-      // 真实 AI 逻辑
       setTypingStatus('AI 专家正在深度思考...');
-      const response = await getGeminiResponse(question);
-      setIsTyping(false);
-      setChatHistory(prev => [...prev, { 
-        role: 'ai', 
-        content: response || "抱歉，服务暂时不可用。建议您咨询临床医师获取专业指导。" 
-      }]);
+      try {
+        const response = await getGeminiResponse(question);
+        setIsTyping(false);
+        setChatHistory(prev => [...prev, { 
+          role: 'ai', 
+          content: response || "抱歉，服务暂时不可用。建议您咨询临床医师获取专业指导。" 
+        }]);
+      } catch (err) {
+        setIsTyping(false);
+        setChatHistory(prev => [...prev, { role: 'ai', content: "网络链路异常，请稍后再试，并务必谨遵医嘱。" }]);
+      }
     }
   };
 
   const handleSend = () => {
-    if (!userInput.trim()) return;
-    processResponse(userInput);
-    setUserInput('');
+    const text = userInput;
+    if (!text.trim()) return;
+    setUserInput(''); // 立即清理，防止重复发送
+    processResponse(text);
   };
 
   return (
     <div className="w-full max-w-7xl mx-auto glass rounded-[3.5rem] border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col lg:flex-row h-[880px]">
       
-      {/* 极客侧边栏：数字身份与安全声明 */}
+      {/* 极客侧边栏 */}
       <div className="lg:w-[320px] bg-slate-900/80 border-r border-white/10 p-8 flex flex-col relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-transparent opacity-50"></div>
         
@@ -71,7 +75,7 @@ const InteractiveExpert: React.FC = () => {
           <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-2xl animate-pulse"></div>
           <div className="relative w-full h-full border-2 border-blue-500/20 rounded-full flex items-center justify-center p-2">
             <div className="w-full h-full bg-slate-800 rounded-full flex items-center justify-center overflow-hidden relative shadow-inner">
-               <svg viewBox="0 0 24 24" className={`w-24 h-24 text-blue-500/70 transition-all duration-700 ${isTyping ? 'scale-110 opacity-100' : 'scale-100 opacity-40'}`} fill="currentColor">
+               <svg viewBox="0 0 24 24" className={`w-24 h-24 text-blue-500/70 transition-all duration-700 ${isTyping ? 'scale-110 opacity-100 rotate-3' : 'scale-100 opacity-40'}`} fill="currentColor">
                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                </svg>
                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent h-full w-full animate-[scan_4s_linear_infinite]"></div>
@@ -82,7 +86,7 @@ const InteractiveExpert: React.FC = () => {
 
         <div className="text-center mb-8">
           <h3 className="text-lg font-black text-white mb-1 tracking-tighter uppercase">Pharmacist AI Core</h3>
-          <p className="text-[9px] text-slate-600 font-bold tracking-[0.4em] uppercase">Security Verified</p>
+          <p className="text-[9px] text-slate-600 font-bold tracking-[0.4em] uppercase">Status: Connected</p>
         </div>
 
         {/* 交互模式切换 */}
@@ -101,13 +105,8 @@ const InteractiveExpert: React.FC = () => {
            </button>
         </div>
 
-        {/* 侧边风险警告卡片 (代替之前的监控面板) */}
-        <div className="mt-auto p-5 bg-amber-500/10 border border-amber-500/30 rounded-3xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-2 opacity-20">
-            <svg className="w-12 h-12 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </div>
+        {/* 侧边风险警告卡片 */}
+        <div className="mt-auto p-5 bg-amber-500/10 border border-amber-500/30 rounded-3xl relative overflow-hidden group">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-3 text-amber-500">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -123,7 +122,7 @@ const InteractiveExpert: React.FC = () => {
       {/* 主对话区 */}
       <div className="flex-1 flex flex-col bg-[#03081a] relative">
         
-        {/* 顶部安全红线 Bar (常驻提醒) */}
+        {/* 顶部安全红线 Bar */}
         <div className="bg-red-500/10 px-8 py-4 border-b border-red-500/20 flex items-center justify-between">
            <div className="flex items-center gap-4">
              <div className="relative">
@@ -151,7 +150,6 @@ const InteractiveExpert: React.FC = () => {
                 }`}>
                   {msg.content}
                   
-                  {/* AI 回复后的安全免责标识 */}
                   {msg.role === 'ai' && idx !== 0 && (
                     <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between opacity-60">
                       <div className="flex items-center gap-2">
@@ -192,13 +190,13 @@ const InteractiveExpert: React.FC = () => {
 
         {/* 输入区与快捷问答 */}
         <div className="p-8 border-t border-white/5 bg-slate-900/30">
-          {/* 快捷问答分类 */}
           <div className="flex overflow-x-auto gap-3 mb-6 scrollbar-hide pb-2">
             {EXPERT_KNOWLEDGE.faqs.slice(0, 6).map((faq, i) => (
               <button 
                 key={i}
                 onClick={() => processResponse(faq.question, faq.answer, faq.citation)}
-                className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-slate-400 hover:bg-blue-600/20 hover:text-blue-400 transition-all whitespace-nowrap flex items-center gap-2"
+                disabled={isTyping}
+                className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-slate-400 hover:bg-blue-600/20 hover:text-blue-400 transition-all whitespace-nowrap flex items-center gap-2 disabled:opacity-50"
               >
                 <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
                 {faq.question}
@@ -206,7 +204,6 @@ const InteractiveExpert: React.FC = () => {
             ))}
           </div>
 
-          {/* 交互输入框 */}
           <div className="relative group">
             <input 
               type="text"
@@ -214,16 +211,10 @@ const InteractiveExpert: React.FC = () => {
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="向 AI 数字药学专家提问（如：如何预防低血糖？）"
-              className="w-full bg-black/50 border border-white/10 rounded-2xl py-5 pl-8 pr-36 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-inner"
+              disabled={isTyping}
+              className="w-full bg-black/50 border border-white/10 rounded-2xl py-5 pl-8 pr-36 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-inner disabled:opacity-50"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-              <button 
-                onClick={() => alert('语音交互功能初始化中，请稍后...')}
-                className="p-3 text-slate-600 hover:text-blue-400 transition-colors"
-                title="语音输入"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-              </button>
               <button 
                 onClick={handleSend}
                 disabled={!userInput.trim() || isTyping}
@@ -234,11 +225,10 @@ const InteractiveExpert: React.FC = () => {
             </div>
           </div>
           
-          {/* 底部微型提醒 */}
           <div className="mt-4 flex justify-center">
             <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] flex items-center gap-2">
               <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-              All clinical decisions must be supervised by medical professionals
+              Pharmacist AI Core v2.5.1 Online
               <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
             </p>
           </div>
