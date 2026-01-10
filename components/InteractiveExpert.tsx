@@ -94,17 +94,22 @@ const InteractiveExpert: React.FC = () => {
            </button>
         </div>
 
-        {/* 侧边免责提示 */}
-        <div className="mt-auto p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
-          <div className="flex items-center gap-2 mb-2 text-amber-500">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span className="text-[10px] font-black uppercase tracking-widest">Medical Disclaimer</span>
+        {/* 侧边免责提示 (强化版) */}
+        <div className="mt-auto p-6 bg-amber-500/10 border border-amber-500/30 rounded-3xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-amber-500/5 animate-pulse"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-3 text-amber-500">
+              <div className="p-1.5 bg-amber-500 rounded-lg">
+                <svg className="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <span className="text-[11px] font-black uppercase tracking-widest">医疗免责声明</span>
+            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed font-bold">
+              AI 专家回复基于通用药学数据库，仅供科普。临床用药具有极强个体差异，<span className="text-amber-500 uppercase">严禁自行调药</span>，请咨询医师。
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-            本模型仅提供通用药学参考。病情差异大，任何治疗变更请务必咨询您的主治医师。
-          </p>
         </div>
       </div>
 
@@ -129,13 +134,20 @@ const InteractiveExpert: React.FC = () => {
            ))}
         </div>
 
-        {/* 对话提醒 Bar */}
-        <div className="bg-blue-500/5 px-10 py-3 border-b border-white/5 flex items-center justify-between">
-           <div className="flex items-center gap-3">
-             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
-             <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">安全提醒：请勿擅自更改给药剂量</span>
+        {/* 安全提醒 Bar (常驻顶部) */}
+        <div className="bg-red-500/10 px-10 py-4 border-b border-red-500/20 flex items-center justify-between">
+           <div className="flex items-center gap-4">
+             <div className="relative">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping absolute inset-0"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-red-600 relative"></div>
+             </div>
+             <span className="text-xs font-black text-red-400 tracking-[0.2em] uppercase">
+                安全红线：请严格遵循主治医师制定的给药方案
+             </span>
            </div>
-           <span className="text-[10px] font-black text-blue-400/60 uppercase">遵医嘱执行</span>
+           <div className="flex items-center gap-3">
+             <span className="px-3 py-1 bg-red-500 text-black text-[9px] font-black rounded-full uppercase tracking-tighter">谨遵医嘱</span>
+           </div>
         </div>
 
         {/* 消息流 */}
@@ -143,17 +155,27 @@ const InteractiveExpert: React.FC = () => {
           {chatHistory.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in`}>
               <div className={`max-w-[85%] group ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`p-6 rounded-3xl text-base leading-relaxed font-medium shadow-2xl ${
+                <div className={`p-6 rounded-3xl text-base leading-relaxed font-medium shadow-2xl relative ${
                   msg.role === 'user' 
                     ? 'bg-blue-600 text-white rounded-tr-none' 
                     : 'glass border-white/10 text-slate-200 rounded-tl-none backdrop-blur-3xl'
                 }`}>
                   {msg.content}
+                  
+                  {/* AI 回复后的安全标签 */}
+                  {msg.role === 'ai' && idx !== 0 && (
+                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 opacity-60">
+                      <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-[10px] font-bold text-slate-500 tracking-widest uppercase italic">建议结合临床医师指导使用</span>
+                    </div>
+                  )}
                 </div>
                 {msg.citation && (
                    <div className="mt-3 px-4 py-1 text-[10px] font-black text-slate-600 uppercase tracking-widest animate-in flex justify-between items-center w-full">
                      <span>REF: {msg.citation}</span>
-                     {msg.role === 'ai' && <span className="text-amber-500/60 font-bold">⚠️ 建议咨询医师</span>}
+                     {msg.role === 'ai' && <span className="text-amber-500/80 font-black">⚠️ 咨询医师后再操作</span>}
                    </div>
                 )}
               </div>
@@ -178,10 +200,10 @@ const InteractiveExpert: React.FC = () => {
           <div className="flex items-center gap-4 mb-6">
              <div className="w-1.5 h-6 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
              <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">
-                {EXPERT_KNOWLEDGE.categories.find(c => c.id === activeCategory)?.name} - 深度解析
+                {EXPERT_KNOWLEDGE.categories.find(c => c.id === activeCategory)?.name} - 智能交互库
              </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {EXPERT_KNOWLEDGE.faqs.filter(f => f.cat === activeCategory).map((faq, idx) => (
               <button 
                 key={idx}
@@ -189,9 +211,9 @@ const InteractiveExpert: React.FC = () => {
                 disabled={isTyping}
                 className="group p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-left transition-all hover:bg-blue-600/20 hover:border-blue-500/30 disabled:opacity-50"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-400 group-hover:text-blue-300">{faq.question}</span>
-                  <svg className="w-4 h-4 text-slate-700 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-bold text-slate-400 group-hover:text-blue-300 leading-snug line-clamp-2">{faq.question}</span>
+                  <svg className="w-4 h-4 text-slate-700 group-hover:text-blue-500 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </div>

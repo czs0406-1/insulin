@@ -72,6 +72,7 @@ export const EXPERT_KNOWLEDGE = {
     { id: 'storage', name: '储存科学', icon: '❄️' },
     { id: 'usage', name: '临床使用', icon: '💉' },
     { id: 'safety', name: '紧急避险', icon: '⚠️' },
+    { id: 'lifestyle', name: '生活方式', icon: '🏃' },
     { id: 'science', name: '药理科普', icon: '🧬' }
   ],
   faqs: [
@@ -104,6 +105,24 @@ export const EXPERT_KNOWLEDGE = {
       question: "低血糖的“15法则”是什么？",
       answer: "发生低血糖时：1.立即吃15g快速糖（3-5块糖果或150ml果汁）；2.等待15分钟测量血糖；3.若未达标，再吃15g，直到恢复正常。",
       citation: "Source: ADA 诊疗标准"
+    },
+    {
+      cat: 'safety',
+      question: "不小心打多了剂量怎么办？",
+      answer: "1. 立即监测血糖；2. 摄入适量碳水化合物（如面包、饼干）；3. 密切观察有无心慌、手抖等症状；4. 若剂量过大且血糖持续下降，必须【立即就医】。",
+      citation: "Source: 急诊药学规程"
+    },
+    {
+      cat: 'lifestyle',
+      question: "使用胰岛素期间能喝酒吗？",
+      answer: "【不建议】。酒精会抑制肝糖原输出，显著增加“迟发型低血糖”的风险。如果必须饮酒，请勿空腹，并务必加强血糖监测，且告知家人或朋友。",
+      citation: "Source: 糖尿病患者教育手册"
+    },
+    {
+      cat: 'lifestyle',
+      question: "运动对胰岛素有影响吗？",
+      answer: "有的。运动会增加肌肉对葡萄糖的利用。剧烈运动前后需调整剂量或补充碳水，防止运动诱发的低血糖。建议运动前咨询医生制定个性化方案。",
+      citation: "Source: 运动医学指南"
     },
     {
       cat: 'science',
