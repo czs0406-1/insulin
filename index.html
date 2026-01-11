@@ -49,6 +49,14 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
         }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
     </style>
 <script type="importmap">
 {

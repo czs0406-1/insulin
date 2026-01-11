@@ -12,8 +12,8 @@ const InsulinTypes: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center mb-32">
-          <span className="text-cyan-500 font-black text-xs uppercase tracking-[0.5em] mb-6 block">Pharmacological Map</span>
-          <h2 className="text-5xl md:text-7xl font-black mb-10 tracking-tight">药学家族图谱</h2>
+          <span className="text-cyan-500 font-black text-2xl uppercase tracking-[0.5em] mb-8 block">Pharmacological Map</span>
+          <h2 className="text-5xl md:text-7xl font-black mb-10 tracking-tight">胰岛素家族图谱</h2>
           <p className="text-slate-500 max-w-3xl mx-auto text-xl font-medium leading-relaxed">
             不同的药动学特征，交织成精准治疗的华丽乐章。
           </p>

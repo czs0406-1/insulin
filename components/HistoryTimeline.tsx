@@ -12,7 +12,7 @@ const HistoryTimeline: React.FC = () => {
   return (
     <div className="py-40 px-4 max-w-7xl mx-auto">
       <div className="text-center mb-28">
-        <span className="text-purple-500 font-black text-xs uppercase tracking-[0.5em] mb-6 block">Centennial Journey</span>
+        <span className="text-purple-500 font-black text-2xl uppercase tracking-[0.5em] mb-8 block">Centennial Journey</span>
         <h2 className="text-5xl md:text-7xl font-black mb-10 text-white tracking-tighter">生命的刻度</h2>
         <p className="text-slate-500 max-w-2xl mx-auto text-xl font-medium leading-relaxed">
           跨越世纪的医学奥德赛，从多伦多的实验室到数字化未来的精准医疗。
