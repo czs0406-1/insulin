@@ -9,51 +9,54 @@ const InteractiveExpert: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'ai', content: string, citation?: string}[]>([
     { 
       role: 'ai', 
-      content: '您好。我是数字药学导师。请注意：本系统仅供药学知识科普参考，不作为临床诊断依据。所有用药调整及剂量变更，请务必【谨遵医嘱】。您可以选择下方快捷问题，或直接向我自由提问。' 
+      content: '您好！我是数字药学导师。请注意：本系统仅供药学知识科普，不作为临床诊断依据。所有用药调整，请务必【谨遵医嘱】。' 
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
-  const [typingStatus, setTypingStatus] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // 消息自动吸底
+  const scrollToBottom = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [chatHistory, isTyping]);
 
   const processResponse = async (question: string, predefinedAnswer?: string, citation?: string) => {
     if (isTyping || !question.trim()) return;
     
+    // 1. 立即展示用户发送的消息
     setChatHistory(prev => [...prev, { role: 'user', content: question }]);
     setIsTyping(true);
-    setTypingStatus('正在调取知识库...');
+    
+    // 模拟网络延迟或处理时间，增强真实感
+    const delay = predefinedAnswer ? 800 : 0;
 
     if (predefinedAnswer) {
       setTimeout(() => {
         setIsTyping(false);
-        const prefix = personality === 'mentor' ? "【专家解析】： " : "温馨提醒： ";
+        const prefix = personality === 'mentor' ? "【专家解析】\n" : "温馨提醒：\n";
         setChatHistory(prev => [...prev, { 
           role: 'ai', 
           content: prefix + predefinedAnswer,
           citation: citation
         }]);
-      }, 1000);
+      }, delay);
     } else {
-      setTypingStatus('AI 专家深度思考中...');
       try {
         const response = await getGeminiResponse(question);
         setIsTyping(false);
         setChatHistory(prev => [...prev, { 
           role: 'ai', 
-          content: response || "抱歉，由于算力调度问题，暂时无法生成回答。请务必咨询您的临床医师。" 
+          content: response || "抱歉，暂时无法回答该问题。建议您咨询医师获取指导。" 
         }]);
       } catch (err) {
         setIsTyping(false);
-        setChatHistory(prev => [...prev, { role: 'ai', content: "系统连接受限。如有紧急用药疑问，请咨询专业医师。" }]);
+        setChatHistory(prev => [...prev, { role: 'ai', content: "系统连接异常，请咨询医师并务必谨遵医嘱。" }]);
       }
     }
   };
@@ -61,152 +64,154 @@ const InteractiveExpert: React.FC = () => {
   const handleSend = () => {
     const text = userInput;
     if (!text.trim()) return;
-    setUserInput('');
+    setUserInput(''); // 清空输入框
     processResponse(text);
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row h-[800px] rounded-[2.5rem] overflow-hidden bg-[#0a0f25] border border-white/5 shadow-2xl">
+    <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row h-[750px] rounded-[2rem] overflow-hidden bg-[#030712] border border-white/10 shadow-2xl relative">
       
-      {/* 侧边栏：数字人面板 */}
-      <aside className="lg:w-72 bg-[#0d122b] border-r border-white/5 flex flex-col items-center p-8">
-        <div className="relative mb-8 group">
-          <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-2xl group-hover:bg-cyan-500/30 transition-all"></div>
-          <div className="relative w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-cyan-500/50 to-blue-500/50">
-            <div className="w-full h-full rounded-full bg-[#111835] flex items-center justify-center overflow-hidden">
-              <svg viewBox="0 0 24 24" className={`w-16 h-16 text-cyan-400/80 transition-all duration-700 ${isTyping ? 'scale-110' : 'scale-100'}`} fill="currentColor">
-                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
-              {isTyping && <div className="absolute inset-0 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>}
-            </div>
+      {/* 侧边栏 - 精简版 */}
+      <aside className="lg:w-64 bg-[#080c20] border-r border-white/5 flex flex-col p-6">
+        <div className="flex flex-col items-center mb-10">
+          <div className="relative mb-4">
+             <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 p-0.5 shadow-[0_0_30px_rgba(37,99,235,0.2)]">
+               <div className="w-full h-full rounded-full bg-[#080c20] flex items-center justify-center overflow-hidden">
+                 <svg viewBox="0 0 24 24" className="w-12 h-12 text-blue-400" fill="currentColor">
+                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                 </svg>
+               </div>
+             </div>
+             <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-[#080c20] rounded-full"></div>
           </div>
-          <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-[#0d122b] rounded-full"></div>
+          <h3 className="text-xs font-black text-white uppercase tracking-widest">Pharmacist AI</h3>
+          <p className="text-[10px] text-blue-500/60 font-bold uppercase tracking-widest mt-1">Digital Mentor</p>
         </div>
 
-        <div className="text-center mb-10">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">Pharmacist AI</h3>
-          <p className="text-[10px] text-cyan-500/60 font-bold uppercase tracking-widest">Digital Mentor</p>
-        </div>
-
-        <nav className="w-full space-y-2 mb-10">
+        <div className="space-y-2 mb-8">
           <button 
             onClick={() => setPersonality('mentor')}
-            className={`w-full py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 ${personality === 'mentor' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-900/40' : 'text-slate-500 hover:bg-white/5'}`}
+            className={`w-full py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all flex items-center gap-2 ${personality === 'mentor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-600 hover:bg-white/5'}`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${personality === 'mentor' ? 'bg-white' : 'bg-slate-700'}`}></span>
             专家模式
           </button>
           <button 
             onClick={() => setPersonality('friend')}
-            className={`w-full py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 ${personality === 'friend' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' : 'text-slate-500 hover:bg-white/5'}`}
+            className={`w-full py-2.5 px-4 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all flex items-center gap-2 ${personality === 'friend' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-600 hover:bg-white/5'}`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${personality === 'friend' ? 'bg-white' : 'bg-slate-700'}`}></span>
             助手模式
           </button>
-        </nav>
+        </div>
 
-        <div className="mt-auto bg-amber-500/5 border border-amber-500/20 p-4 rounded-2xl">
-           <div className="flex items-center gap-2 mb-2 text-amber-500">
-             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-             <span className="text-[9px] font-black uppercase tracking-widest">安全警示</span>
-           </div>
-           <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-             科普回复不具处方效力。所有治疗变更须由主治医师决定。
+        <div className="mt-auto bg-amber-500/5 border border-amber-500/20 p-4 rounded-xl">
+           <span className="text-[9px] font-black text-amber-500 uppercase flex items-center gap-2 mb-1">
+             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+             安全提示
+           </span>
+           <p className="text-[9px] text-slate-500 font-bold leading-relaxed">
+             科普不作诊断。任何调药请务必咨询您的主治医师。
            </p>
         </div>
       </aside>
 
-      {/* 主工作区 */}
-      <main className="flex-1 flex flex-col bg-[#0b1029]">
-        {/* 顶部警告吸顶条 */}
-        <header className="px-8 py-3 bg-red-500/5 border-b border-white/5 flex items-center justify-between">
+      {/* 聊天核心区 */}
+      <main className="flex-1 flex flex-col bg-[#05091a]">
+        {/* 状态栏 */}
+        <header className="px-8 py-3 border-b border-white/5 flex items-center justify-between bg-black/20">
           <div className="flex items-center gap-3">
-             <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-             </span>
-             <span className="text-[10px] font-black text-red-500/80 uppercase tracking-widest">
-                核心准则：胰岛素使用必须严格遵医嘱
-             </span>
+             <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
+             <span className="text-[10px] font-black text-red-500/80 uppercase tracking-widest">胰岛素使用必须严格遵医嘱</span>
           </div>
-          <span className="text-[8px] font-bold text-slate-700 uppercase tracking-[0.3em]">AI-PHARMACY CORE v2.5.2</span>
+          <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">Encrypted Session</span>
         </header>
 
-        {/* 聊天内容区 */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-6">
+        {/* 消息滚动容器 */}
+        <div 
+          ref={scrollRef} 
+          className="flex-1 overflow-y-auto px-6 py-8 space-y-6 scroll-smooth"
+        >
           {chatHistory.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in`}>
-              <div className={`max-w-[80%] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
-                <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-lg ${
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} items-end gap-3`}>
+              {msg.role === 'ai' && (
+                <div className="w-8 h-8 rounded-full bg-blue-900/40 border border-blue-500/20 flex items-center justify-center flex-shrink-0 text-[10px] font-black text-blue-400">P</div>
+              )}
+              
+              <div className={`max-w-[85%] flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                {/* 气泡 - 增加换行和溢出处理 */}
+                <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words shadow-lg ${
                   msg.role === 'user' 
-                    ? 'bg-gradient-to-tr from-cyan-600 to-blue-600 text-white rounded-tr-none' 
-                    : 'bg-white/5 border border-white/10 text-slate-200 rounded-tl-none backdrop-blur-md'
+                    ? 'bg-blue-600 text-white rounded-tr-none' 
+                    : 'bg-white/5 border border-white/10 text-slate-200 rounded-tl-none'
                 }`}>
                   {msg.content}
                 </div>
+                
                 {msg.citation && (
-                  <div className="mt-2 flex items-center gap-2 opacity-50 px-1">
-                    <span className="text-[9px] font-black text-cyan-500 uppercase">Ref</span>
-                    <span className="text-[9px] font-medium text-slate-500">{msg.citation}</span>
+                  <div className="mt-1.5 px-1 flex items-center gap-2 opacity-40">
+                    <span className="text-[9px] font-black text-blue-400 uppercase">Cite:</span>
+                    <span className="text-[9px] font-medium text-slate-400 italic">{msg.citation}</span>
                   </div>
                 )}
+
                 {msg.role === 'ai' && i > 0 && (
-                   <div className="mt-2 px-1 text-[8px] font-black text-amber-500/60 uppercase italic tracking-widest">
-                     谨遵医嘱 · 非诊断建议
+                   <div className="mt-1 px-1 text-[8px] font-black text-amber-500/40 uppercase tracking-widest italic">
+                     谨遵医嘱 · 非处方建议
                    </div>
                 )}
               </div>
+
+              {msg.role === 'user' && (
+                <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/5 flex items-center justify-center flex-shrink-0 text-[10px] font-black text-slate-400">Me</div>
+              )}
             </div>
           ))}
+
           {isTyping && (
-            <div className="flex justify-start animate-pulse">
-              <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tl-none flex items-center gap-3">
-                 <div className="flex gap-1">
-                   <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce"></div>
-                   <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                   <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                 </div>
-                 <span className="text-[10px] font-bold text-cyan-500/60 uppercase tracking-widest">{typingStatus}</span>
-              </div>
+            <div className="flex justify-start items-center gap-3 animate-pulse">
+               <div className="w-8 h-8 rounded-full bg-blue-900/40 border border-blue-500/20 flex items-center justify-center text-[10px] font-black text-blue-400">P</div>
+               <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl rounded-tl-none flex gap-1">
+                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></div>
+                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+               </div>
             </div>
           )}
         </div>
 
-        {/* 交互输入区 */}
-        <footer className="p-8 pt-0">
-          {/* 快捷推荐问题 */}
-          <div className="flex gap-2 overflow-x-auto pb-6 scrollbar-hide no-scrollbar">
-            {EXPERT_KNOWLEDGE.faqs.slice(0, 6).map((faq, i) => (
+        {/* 交互底部 */}
+        <footer className="p-6 border-t border-white/5 bg-black/10">
+          {/* FAQ 快速按钮 - 现在点击会立即出现用户消息 */}
+          <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+            {EXPERT_KNOWLEDGE.faqs.slice(0, 5).map((faq, i) => (
               <button 
                 key={i}
                 onClick={() => processResponse(faq.question, faq.answer, faq.citation)}
                 disabled={isTyping}
-                className="whitespace-nowrap px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all disabled:opacity-50"
+                className="flex-shrink-0 px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 hover:text-blue-400 hover:border-blue-500/30 transition-all disabled:opacity-30"
               >
                 {faq.question}
               </button>
             ))}
           </div>
 
-          <div className="relative">
+          {/* 输入框 */}
+          <div className="relative flex items-center">
              <input 
                type="text"
                value={userInput}
                onChange={(e) => setUserInput(e.target.value)}
                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-               placeholder="向数字专家提问（例如：低血糖该如何紧急处理？）"
+               placeholder="向数字专家提问（如：胰岛素如何储存？）"
                disabled={isTyping}
-               className="w-full bg-[#111835] border border-white/10 rounded-2xl py-5 pl-8 pr-32 text-sm text-white focus:outline-none focus:border-cyan-500/50 focus:ring-4 focus:ring-cyan-500/5 transition-all placeholder:text-slate-600 disabled:opacity-50 shadow-inner"
+               className="w-full bg-[#111835] border border-white/10 rounded-xl py-4 pl-6 pr-24 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all placeholder:text-slate-600 disabled:opacity-50"
              />
-             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <button 
-                  onClick={handleSend}
-                  disabled={!userInput.trim() || isTyping}
-                  className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 disabled:hover:bg-cyan-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-cyan-900/40"
-                >
-                  发送
-                </button>
-             </div>
+             <button 
+               onClick={handleSend}
+               disabled={!userInput.trim() || isTyping}
+               className="absolute right-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 text-white text-[10px] font-black uppercase rounded-lg transition-all"
+             >
+               发送
+             </button>
           </div>
         </footer>
       </main>
@@ -214,11 +219,6 @@ const InteractiveExpert: React.FC = () => {
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in { animation: in 0.4s ease-out forwards; }
       `}</style>
     </div>
   );
