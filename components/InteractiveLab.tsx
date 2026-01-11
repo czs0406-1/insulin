@@ -51,7 +51,7 @@ const InteractiveLab: React.FC = () => {
           }
           return prev + 1;
         });
-      }, 40); 
+      }, 50); 
     }
     return () => clearInterval(interval);
   }, [simulationState]);
@@ -64,10 +64,10 @@ const InteractiveLab: React.FC = () => {
   const currentPK = (pkData as any)[selectedType];
 
   return (
-    <div className="w-full max-w-7xl mx-auto bg-white rounded-[3rem] border border-slate-100 overflow-hidden shadow-2xl relative">
+    <div className="w-full max-w-7xl mx-auto bg-white rounded-[3rem] border border-stone-100 overflow-hidden shadow-2xl relative">
       
       {/* 模块切换导航 */}
-      <div className="flex bg-slate-50 border-b border-slate-100">
+      <div className="flex bg-stone-50 border-b border-stone-100">
         {[
           { id: 'dynamics', label: '药动学全景模拟', icon: '📊' },
           { id: 'cellular', label: '细胞通路解锁', icon: '🧫' }
@@ -75,13 +75,13 @@ const InteractiveLab: React.FC = () => {
           <button 
             key={tab.id}
             onClick={() => { setActiveModule(tab.id as any); setSimulationState('idle'); setScanProgress(0); }}
-            className={`flex-1 py-10 flex flex-col items-center gap-3 transition-all relative group ${activeModule === tab.id ? 'bg-white' : 'hover:bg-slate-100/50'}`}
+            className={`flex-1 py-10 flex flex-col items-center gap-3 transition-all relative group ${activeModule === tab.id ? 'bg-white' : 'hover:bg-stone-100/50'}`}
           >
             <span className={`text-3xl transition-transform ${activeModule === tab.id ? 'scale-110' : ''}`}>{tab.icon}</span>
-            <span className={`text-base font-black uppercase tracking-[0.2em] ${activeModule === tab.id ? 'text-blue-600' : 'text-slate-400'}`}>
+            <span className={`text-base font-black uppercase tracking-[0.2em] ${activeModule === tab.id ? 'text-indigo-600' : 'text-stone-400'}`}>
               {tab.label}
             </span>
-            {activeModule === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>}
+            {activeModule === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-500"></div>}
           </button>
         ))}
       </div>
@@ -91,42 +91,42 @@ const InteractiveLab: React.FC = () => {
         {/* 左侧控制面板 */}
         <div className="lg:w-[360px] flex flex-col justify-between space-y-8">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-widest">
-              <span className={`w-2 h-2 rounded-full ${simulationState === 'running' ? 'bg-amber-400 animate-ping' : 'bg-green-400'}`}></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-50 border border-stone-100 text-stone-600 text-[10px] font-black uppercase tracking-widest">
+              <span className={`w-2 h-2 rounded-full ${simulationState === 'running' ? 'bg-indigo-400 animate-ping' : 'bg-stone-300'}`}></span>
               Status: {simulationState}
             </div>
             
-            <h3 className="text-3xl lg:text-4xl font-black text-slate-900 leading-tight tracking-tighter">
+            <h3 className="text-3xl lg:text-4xl font-extrabold text-stone-900 leading-tight tracking-tighter">
               {activeModule === 'dynamics' && "时效动力模拟"}
               {activeModule === 'cellular' && "胞内信号联级"}
             </h3>
 
             <div className="space-y-4">
-              <p className="text-slate-500 text-lg font-medium">
+              <p className="text-stone-500 text-lg font-medium">
                 {activeModule === 'dynamics' && "实时模拟药物在体内的浓度曲线（实线）及对应的血糖下降趋势（虚线）。"}
-                {activeModule === 'cellular' && "模拟胰岛素与受体结合后的跨膜传递过程。观察 GLUT4 转运蛋白如何开启。"}
+                {activeModule === 'cellular' && "解构胰岛素受体激活后的跨膜信号传递过程，观察 GLUT4 转运蛋白如何开启。"}
               </p>
               
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
+              <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Progress</span>
-                  <span className="text-sm font-mono font-black text-blue-600">{scanProgress}%</span>
+                  <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Processing</span>
+                  <span className="text-sm font-mono font-black text-indigo-600">{scanProgress}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${scanProgress}%` }}></div>
+                <div className="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-500 transition-all duration-300" style={{ width: `${scanProgress}%` }}></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4 pt-8 border-t border-slate-100">
+          <div className="space-y-4 pt-8 border-t border-stone-100">
             {activeModule === 'dynamics' && (
               <div className="grid grid-cols-2 gap-3">
                 {Object.keys(pkData).map(k => (
                   <button 
                     key={k}
                     onClick={() => { setSelectedType(k); setSimulationState('idle'); setScanProgress(0); }}
-                    className={`py-4 rounded-xl text-sm font-black uppercase tracking-widest border transition-all ${selectedType === k ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-transparent text-slate-400 border-slate-200 hover:border-blue-200'}`}
+                    className={`py-4 rounded-xl text-sm font-black uppercase tracking-widest border transition-all ${selectedType === k ? 'bg-stone-900 text-white border-stone-900 shadow-lg' : 'bg-transparent text-stone-400 border-stone-100 hover:border-stone-200'}`}
                   >
                     {(pkData as any)[k].label}
                   </button>
@@ -137,7 +137,7 @@ const InteractiveLab: React.FC = () => {
             <button 
               onClick={handleRunSim}
               disabled={simulationState === 'running'}
-              className={`w-full py-6 rounded-xl text-xl font-black transition-all shadow-xl ${simulationState !== 'running' ? 'bg-slate-900 hover:bg-black text-white' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+              className={`w-full py-6 rounded-xl text-xl font-black transition-all shadow-xl ${simulationState !== 'running' ? 'bg-stone-900 hover:bg-black text-white' : 'bg-stone-100 text-stone-300 cursor-not-allowed'}`}
             >
               {simulationState === 'idle' ? '启动仿真程序' : '仿真运行中'}
             </button>
@@ -145,17 +145,17 @@ const InteractiveLab: React.FC = () => {
         </div>
 
         {/* 右侧交互视觉区 */}
-        <div className="flex-1 relative rounded-[2rem] bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center">
+        <div className="flex-1 relative rounded-[2rem] bg-stone-50/50 border border-stone-100 overflow-hidden flex items-center justify-center">
           
           {activeModule === 'dynamics' && (
             <div className="absolute inset-0 flex items-stretch p-12">
                <div className="flex-1 flex flex-col relative">
-                  <div className="absolute inset-0 bg-green-500/5 rounded-2xl border border-green-500/10 pointer-events-none" style={{ top: '40%', height: '25%' }}>
-                     <span className="absolute right-4 top-2 text-[10px] font-black text-green-600/50 uppercase tracking-widest">Normal Glycemic Zone</span>
+                  <div className="absolute inset-0 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 pointer-events-none" style={{ top: '40%', height: '25%' }}>
+                     <span className="absolute right-4 top-2 text-[10px] font-black text-emerald-600/50 uppercase tracking-widest">Target Glycemic Zone</span>
                   </div>
                   
-                  <div className="flex-1 relative border-l-2 border-b-2 border-slate-200 mb-8 overflow-hidden">
-                     <div className="absolute top-0 bottom-0 w-[1px] bg-slate-400/50 z-20" style={{ left: `${scanProgress}%`, opacity: simulationState === 'running' ? 1 : 0 }}></div>
+                  <div className="flex-1 relative border-l-2 border-b-2 border-stone-200 mb-8 overflow-hidden">
+                     <div className="absolute top-0 bottom-0 w-[1px] bg-indigo-400/50 z-20" style={{ left: `${scanProgress}%`, opacity: simulationState === 'running' ? 1 : 0 }}></div>
 
                      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
                         <defs>
@@ -164,7 +164,7 @@ const InteractiveLab: React.FC = () => {
                             <stop offset="100%" stopColor={currentPK.color} stopOpacity="0" />
                           </linearGradient>
                         </defs>
-                        <g stroke="#e2e8f0" strokeWidth="0.2">
+                        <g stroke="#f5f5f4" strokeWidth="0.2">
                            {[20, 40, 60, 80].map(v => <line key={v} x1={v} y1="0" x2={v} y2="100" />)}
                            {[25, 50, 75].map(v => <line key={v} x1="0" y1={v} x2="100" y2={v} />)}
                         </g>
@@ -194,82 +194,157 @@ const InteractiveLab: React.FC = () => {
                   
                   <div className="flex justify-between px-2">
                      {['0h', '4h', '8h', '12h', '16h', '20h', '24h'].map(t => (
-                        <span key={t} className="text-[10px] font-black text-slate-400 font-mono">{t}</span>
+                        <span key={t} className="text-[10px] font-black text-stone-300 font-mono">{t}</span>
                      ))}
                   </div>
 
-                  <div className="absolute bottom-8 right-8 flex items-center gap-3 bg-white px-6 py-3 rounded-2xl border border-slate-100 shadow-lg">
-                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Peak:</span>
-                     <span className="text-xl font-black text-slate-800">{currentPK.peak}</span>
+                  <div className="absolute bottom-8 right-8 flex items-center gap-3 bg-white px-6 py-3 rounded-2xl border border-stone-100 shadow-xl">
+                     <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Peak:</span>
+                     <span className="text-xl font-black text-stone-800">{currentPK.peak}</span>
                   </div>
                </div>
             </div>
           )}
 
           {activeModule === 'cellular' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-slate-50">
-              <div className="relative w-full h-full max-w-4xl overflow-hidden border border-slate-200 rounded-[2rem] bg-white shadow-inner">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
+              <div className="relative w-full h-full max-w-4xl overflow-hidden border border-stone-200 rounded-[3rem] bg-white shadow-2xl">
                 <svg viewBox="0 0 800 600" className="w-full h-full">
                   <defs>
-                    <pattern id="lipidPatternLight" x="0" y="0" width="20" height="40" patternUnits="userSpaceOnUse">
-                      <circle cx="10" cy="5" r="4" fill="#94a3b8" opacity="0.3" />
-                      <line x1="8" y1="9" x2="8" y2="20" stroke="#94a3b8" strokeWidth="1" opacity="0.2" />
-                      <line x1="12" y1="9" x2="12" y2="20" stroke="#94a3b8" strokeWidth="1" opacity="0.2" />
-                      <circle cx="10" cy="35" r="4" fill="#94a3b8" opacity="0.3" />
+                    <pattern id="lipidPatternStone" x="0" y="0" width="20" height="40" patternUnits="userSpaceOnUse">
+                      <circle cx="10" cy="6" r="5" fill="#e7e5e4" />
+                      <line x1="10" y1="12" x2="10" y2="25" stroke="#e7e5e4" strokeWidth="1.5" />
+                      <circle cx="10" cy="34" r="5" fill="#e7e5e4" />
                     </pattern>
+                    <filter id="glow">
+                      <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
                   </defs>
 
-                  <text x="30" y="50" className="text-[10px] fill-slate-300 font-black uppercase tracking-widest">Extracellular Fluid</text>
-                  
-                  {[...Array(6)].map((_, i) => (
-                    <circle 
-                      key={i} 
-                      r="5" 
-                      fill="#3b82f6" 
-                      cx={350 + i * 20} 
-                      cy={-20 + (scanProgress * 2.5)}
-                      opacity={scanProgress > 5 ? 1 : 0}
-                      style={{ transition: 'cy 0.1s linear' }}
-                    />
-                  ))}
+                  {/* 细胞外部与转运动画：葡萄糖 */}
+                  <text x="30" y="40" className="text-[11px] fill-stone-300 font-bold uppercase tracking-widest">Extracellular Fluid (Glucose rich)</text>
+                  {[...Array(18)].map((_, i) => {
+                    const isTransporting = scanProgress > 95;
+                    // 大幅增加位移系数，使得糖分子能够跨越 y=180 的界限，进入 300+ 的胞内区
+                    const transportProgress = isTransporting ? (scanProgress - 95) * 60 : 0;
+                    // 设置约 1/3 的分子执行穿膜转运
+                    const shouldTransport = i % 3 === 0;
+                    const yOffset = shouldTransport ? transportProgress : 0;
+                    
+                    // 当分子完全进入胞内时，降低透明度模拟被利用
+                    const isFullyInside = (40 + (i % 3 * 25) + yOffset) > 220;
+                    const opacity = isFullyInside ? 0.4 : 0.8;
 
-                  <rect x="0" y="180" width="800" height="40" fill="url(#lipidPatternLight)" />
+                    return (
+                      <circle 
+                        key={`glc-${i}`}
+                        r="4.5" 
+                        fill="#10b981" 
+                        opacity={opacity}
+                        cx={40 + (i * 44) + (Math.sin(scanProgress/12 + i) * 10)}
+                        cy={40 + (i % 3 * 25) + yOffset}
+                        className="transition-all duration-300"
+                      />
+                    );
+                  })}
+
+                  {/* 胰岛素分子 */}
+                  {[...Array(4)].map((_, i) => {
+                    const progressFactor = Math.min(scanProgress * 3.5, 130);
+                    return (
+                      <g key={`ins-${i}`} transform={`translate(${340 + i * 40}, ${-20 + progressFactor})`} opacity={scanProgress > 0 ? 1 : 0}>
+                        <circle r="6" fill="#6366f1" filter="url(#glow)" />
+                        <circle r="2" fill="white" cx="-1" cy="-1" />
+                      </g>
+                    );
+                  })}
+
+                  {/* 脂质双分子层 */}
+                  <rect x="0" y="180" width="800" height="40" fill="url(#lipidPatternStone)" />
                   
-                  <g transform="translate(360, 150)">
-                    <path d="M0 0 Q20 -40 40 0" stroke="#cbd5e1" strokeWidth="5" fill="none" />
-                    <path d="M40 0 Q60 -40 80 0" stroke="#cbd5e1" strokeWidth="5" fill="none" />
-                    <rect x="15" y="0" width="10" height="80" fill="#94a3b8" rx="5" />
-                    <rect x="55" y="0" width="10" height="80" fill="#94a3b8" rx="5" />
+                  {/* 胰岛素受体 (IR) */}
+                  <g transform="translate(360, 140)">
+                    {/* 受体 Alpha 亚单位 */}
+                    <path d="M0 0 Q20 -50 40 0" stroke={scanProgress > 35 ? "#6366f1" : "#d6d3d1"} strokeWidth="6" fill="none" className="transition-colors duration-500" />
+                    <path d="M40 0 Q60 -50 80 0" stroke={scanProgress > 35 ? "#6366f1" : "#d6d3d1"} strokeWidth="6" fill="none" className="transition-colors duration-500" />
+                    {/* 受体 Beta 亚单位 (跨膜) */}
+                    <rect x="15" y="0" width="12" height="100" fill={scanProgress > 40 ? "#6366f1" : "#a8a29e"} rx="6" />
+                    <rect x="53" y="0" width="12" height="100" fill={scanProgress > 40 ? "#6366f1" : "#a8a29e"} rx="6" />
+                    {/* 磷酸化位点 */}
+                    {scanProgress > 45 && (
+                      <g filter="url(#glow)">
+                        <circle cx="21" cy="90" r="5" fill="#fb7185" />
+                        <circle cx="59" cy="90" r="5" fill="#fb7185" />
+                        <text x="70" y="95" className="text-[10px] fill-rose-500 font-bold italic">Phosphorylation</text>
+                      </g>
+                    )}
                   </g>
 
-                  {scanProgress > 40 && (
-                    <path 
-                      d="M400 230 Q400 350 300 450 M400 230 Q400 350 500 450" 
-                      stroke="#3b82f6" strokeWidth="1" strokeDasharray="4 4" fill="none"
-                    />
+                  {/* 胞内级联反应 */}
+                  {scanProgress > 50 && (
+                    <g opacity={(scanProgress - 50) / 10}>
+                      <rect x="375" y="260" width="50" height="30" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1" rx="8" />
+                      <text x="400" y="280" textAnchor="middle" className="text-[10px] font-black fill-stone-800">IRS-1</text>
+                      <path d="M400 240 L 400 260" stroke="#f59e0b" strokeWidth="2" markerEnd="url(#arrow)" />
+                    </g>
                   )}
 
+                  {scanProgress > 65 && (
+                    <g opacity={(scanProgress - 65) / 10}>
+                      <circle cx="400" cy="350" r="25" fill="#e0f2fe" stroke="#0ea5e9" strokeWidth="1" />
+                      <text x="400" y="354" textAnchor="middle" className="text-[10px] font-black fill-stone-800">AKT</text>
+                      <path d="M400 290 L 400 325" stroke="#0ea5e9" strokeWidth="2" strokeDasharray="4 2" />
+                    </g>
+                  )}
+
+                  {/* GLUT4 易位模拟 - 修正运移路径使其精确到达细胞膜 */}
                   <g>
                     {[200, 400, 600].map((basePos, i) => {
-                      const yPos = 500 - (scanProgress > 60 ? (scanProgress - 60) * 8 : 0);
+                      const activationDelay = 70;
+                      const isMoving = scanProgress > activationDelay;
+                      const moveDist = isMoving ? (scanProgress - activationDelay) * 11 : 0;
+                      const yPos = 500 - moveDist;
+                      const finalY = Math.max(yPos, 190); 
+                      
                       return (
-                        <g key={i} transform={`translate(${basePos}, ${yPos})`}>
-                          <circle r="25" fill="#f1f5f9" stroke="#cbd5e1" strokeWidth="1" />
-                          <circle r="4" cx="-8" cy="-5" fill="#10b981" />
-                          <circle r="4" cx="8" cy="5" fill="#10b981" />
+                        <g key={i} transform={`translate(${basePos}, ${finalY})`} opacity={scanProgress > 10 ? 1 : 0}>
+                          {/* 小泡 (Vesicle) */}
+                          <circle r="30" fill="none" stroke="#e7e5e4" strokeWidth="1" strokeDasharray="4 4" opacity={finalY > 195 ? 1 : 0.2} />
+                          <circle r="22" fill="#fafaf9" stroke="#cbd5e1" strokeWidth="0.5" opacity={finalY > 195 ? 1 : 0} />
+                          {/* GLUT4 蛋白 */}
+                          <circle r="6" cx="-12" cy="-5" fill="#10b981" filter={scanProgress > 95 ? "url(#glow)" : ""} />
+                          <circle r="6" cx="12" cy="5" fill="#10b981" filter={scanProgress > 95 ? "url(#glow)" : ""} />
+                          <circle r="6" cx="0" cy="-15" fill="#10b981" filter={scanProgress > 95 ? "url(#glow)" : ""} />
                         </g>
                       );
                     })}
                   </g>
+
+                  {/* 信号传播连线 */}
+                  {scanProgress > 70 && (
+                    <path 
+                      d="M400 375 C 400 450, 200 450, 200 470 M400 375 L 400 470 M400 375 C 400 450, 600 450, 600 470" 
+                      stroke="#6366f1" strokeWidth="1.5" strokeDasharray="6 4" fill="none"
+                      className="animate-pulse"
+                    />
+                  )}
+
+                  <text x="30" y="560" className="text-[11px] fill-stone-300 font-bold uppercase tracking-widest">Intracellular (Cytoplasm)</text>
                 </svg>
 
-                <div className="absolute top-6 left-1/2 -translate-x-1/2 px-10 py-5 bg-white border border-slate-100 rounded-3xl text-center shadow-xl min-w-[360px]">
-                   <div className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Cellular Event Log</div>
-                   <div className="text-xl font-black text-slate-800">
-                      {scanProgress < 30 && "Detecting ligands..."}
-                      {scanProgress >= 30 && scanProgress < 60 && "Binding Activated"}
-                      {scanProgress >= 60 && scanProgress < 85 && "Signal Cascade..."}
-                      {scanProgress >= 85 && "GLUT4 Opening"}
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 px-12 py-5 bg-white border border-stone-100 rounded-3xl text-center shadow-2xl min-w-[400px]">
+                   <div className="text-[10px] font-bold text-indigo-500 uppercase tracking-[0.2em] mb-1.5">Simulation Control Log</div>
+                   <div className="text-xl font-extrabold text-stone-800">
+                      {scanProgress < 25 && "等待配体分子接近..."}
+                      {scanProgress >= 25 && scanProgress < 45 && "胰岛素结合并诱导构象改变"}
+                      {scanProgress >= 45 && scanProgress < 60 && "受体酪氨酸激酶自磷酸启动"}
+                      {scanProgress >= 60 && scanProgress < 85 && "胞内级联信号传播 (IRS/AKT)"}
+                      {scanProgress >= 85 && scanProgress < 95 && "GLUT4 蛋白载体向膜转运..."}
+                      {scanProgress >= 95 && "通路激活：载体嵌入，转运开启"}
                    </div>
                 </div>
               </div>
