@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { EXPERT_KNOWLEDGE } from '../constants';
 import { getGeminiResponse } from '../services/geminiService';
@@ -8,7 +7,7 @@ const InteractiveExpert: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'ai', content: string, citation?: string}[]>([
     { 
       role: 'ai', 
-      content: '您好！我是数字药学导师。请注意：本系统仅供药学知识科普，不作为临床诊断依据。所有用药调整，请务必【谨尊医嘱】。' 
+      content: '您好！我是数字药学导师。请注意：本系统仅供药学知识科普，不作为临床诊断依据。所有用药调整，请务必【谨遵医嘱】。' 
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
@@ -51,7 +50,7 @@ const InteractiveExpert: React.FC = () => {
         }]);
       } catch (err) {
         setIsTyping(false);
-        setChatHistory(prev => [...prev, { role: 'ai', content: "系统连接异常，请咨询医师并务必谨尊医嘱。" }]);
+        setChatHistory(prev => [...prev, { role: 'ai', content: "系统连接异常，请咨询医师并务必谨遵医嘱。" }]);
       }
     }
   };

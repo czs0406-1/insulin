@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 
 const InteractiveLab: React.FC = () => {
@@ -86,10 +85,10 @@ const InteractiveLab: React.FC = () => {
         ))}
       </div>
 
-      <div className="p-10 lg:p-16 flex flex-col lg:flex-row gap-12 min-h-[700px] items-stretch">
+      <div className="p-10 lg:p-16 flex flex-col lg:flex-row gap-12 min-h-[800px] items-stretch">
         
         {/* 左侧控制面板 */}
-        <div className="lg:w-[360px] flex flex-col justify-between space-y-8">
+        <div className="lg:w-[360px] flex flex-col justify-between space-y-8 shrink-0">
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-50 border border-stone-100 text-stone-600 text-[10px] font-black uppercase tracking-widest">
               <span className={`w-2 h-2 rounded-full ${simulationState === 'running' ? 'bg-indigo-400 animate-ping' : 'bg-stone-300'}`}></span>
@@ -145,7 +144,7 @@ const InteractiveLab: React.FC = () => {
         </div>
 
         {/* 右侧交互视觉区 */}
-        <div className="flex-1 relative rounded-[2rem] bg-stone-50/50 border border-stone-100 overflow-hidden flex items-center justify-center">
+        <div className="flex-1 relative rounded-[2rem] bg-stone-50/50 border border-stone-100 overflow-hidden">
           
           {activeModule === 'dynamics' && (
             <div className="absolute inset-0 flex items-stretch p-12">
@@ -207,8 +206,22 @@ const InteractiveLab: React.FC = () => {
           )}
 
           {activeModule === 'cellular' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-              <div className="relative w-full h-full max-w-4xl overflow-hidden border border-stone-200 rounded-[3rem] bg-white shadow-2xl">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 gap-8">
+              {/* 模拟控制日志 - 已移至外部顶部 */}
+              <div className="px-12 py-5 bg-white border border-stone-100 rounded-3xl text-center shadow-xl min-w-[420px] z-20">
+                 <div className="text-[10px] font-bold text-indigo-500 uppercase tracking-[0.2em] mb-1.5">Simulation Control Log</div>
+                 <div className="text-xl font-extrabold text-stone-800">
+                    {scanProgress < 25 && "等待配体分子接近..."}
+                    {scanProgress >= 25 && scanProgress < 45 && "胰岛素结合并诱导构象改变"}
+                    {scanProgress >= 45 && scanProgress < 60 && "受体酪氨酸激酶自磷酸启动"}
+                    {scanProgress >= 60 && scanProgress < 85 && "胞内级联信号传播 (IRS/AKT)"}
+                    {scanProgress >= 85 && scanProgress < 95 && "GLUT4 蛋白载体向膜转运..."}
+                    {scanProgress >= 95 && "通路激活：载体嵌入，转运开启"}
+                 </div>
+              </div>
+
+              {/* 动画演示容器 */}
+              <div className="relative w-full flex-1 max-w-4xl overflow-hidden border border-stone-200 rounded-[3rem] bg-white shadow-2xl">
                 <svg viewBox="0 0 800 600" className="w-full h-full">
                   <defs>
                     <pattern id="lipidPatternStone" x="0" y="0" width="20" height="40" patternUnits="userSpaceOnUse">
@@ -229,13 +242,9 @@ const InteractiveLab: React.FC = () => {
                   <text x="30" y="40" className="text-[11px] fill-stone-300 font-bold uppercase tracking-widest">Extracellular Fluid (Glucose rich)</text>
                   {[...Array(18)].map((_, i) => {
                     const isTransporting = scanProgress > 95;
-                    // 大幅增加位移系数，使得糖分子能够跨越 y=180 的界限，进入 300+ 的胞内区
                     const transportProgress = isTransporting ? (scanProgress - 95) * 60 : 0;
-                    // 设置约 1/3 的分子执行穿膜转运
                     const shouldTransport = i % 3 === 0;
                     const yOffset = shouldTransport ? transportProgress : 0;
-                    
-                    // 当分子完全进入胞内时，降低透明度模拟被利用
                     const isFullyInside = (40 + (i % 3 * 25) + yOffset) > 220;
                     const opacity = isFullyInside ? 0.4 : 0.8;
 
@@ -268,13 +277,10 @@ const InteractiveLab: React.FC = () => {
                   
                   {/* 胰岛素受体 (IR) */}
                   <g transform="translate(360, 140)">
-                    {/* 受体 Alpha 亚单位 */}
                     <path d="M0 0 Q20 -50 40 0" stroke={scanProgress > 35 ? "#6366f1" : "#d6d3d1"} strokeWidth="6" fill="none" className="transition-colors duration-500" />
                     <path d="M40 0 Q60 -50 80 0" stroke={scanProgress > 35 ? "#6366f1" : "#d6d3d1"} strokeWidth="6" fill="none" className="transition-colors duration-500" />
-                    {/* 受体 Beta 亚单位 (跨膜) */}
                     <rect x="15" y="0" width="12" height="100" fill={scanProgress > 40 ? "#6366f1" : "#a8a29e"} rx="6" />
                     <rect x="53" y="0" width="12" height="100" fill={scanProgress > 40 ? "#6366f1" : "#a8a29e"} rx="6" />
-                    {/* 磷酸化位点 */}
                     {scanProgress > 45 && (
                       <g filter="url(#glow)">
                         <circle cx="21" cy="90" r="5" fill="#fb7185" />
@@ -289,7 +295,6 @@ const InteractiveLab: React.FC = () => {
                     <g opacity={(scanProgress - 50) / 10}>
                       <rect x="375" y="260" width="50" height="30" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1" rx="8" />
                       <text x="400" y="280" textAnchor="middle" className="text-[10px] font-black fill-stone-800">IRS-1</text>
-                      <path d="M400 240 L 400 260" stroke="#f59e0b" strokeWidth="2" markerEnd="url(#arrow)" />
                     </g>
                   )}
 
@@ -301,7 +306,7 @@ const InteractiveLab: React.FC = () => {
                     </g>
                   )}
 
-                  {/* GLUT4 易位模拟 - 修正运移路径使其精确到达细胞膜 */}
+                  {/* GLUT4 易位模拟 */}
                   <g>
                     {[200, 400, 600].map((basePos, i) => {
                       const activationDelay = 70;
@@ -312,10 +317,8 @@ const InteractiveLab: React.FC = () => {
                       
                       return (
                         <g key={i} transform={`translate(${basePos}, ${finalY})`} opacity={scanProgress > 10 ? 1 : 0}>
-                          {/* 小泡 (Vesicle) */}
                           <circle r="30" fill="none" stroke="#e7e5e4" strokeWidth="1" strokeDasharray="4 4" opacity={finalY > 195 ? 1 : 0.2} />
                           <circle r="22" fill="#fafaf9" stroke="#cbd5e1" strokeWidth="0.5" opacity={finalY > 195 ? 1 : 0} />
-                          {/* GLUT4 蛋白 */}
                           <circle r="6" cx="-12" cy="-5" fill="#10b981" filter={scanProgress > 95 ? "url(#glow)" : ""} />
                           <circle r="6" cx="12" cy="5" fill="#10b981" filter={scanProgress > 95 ? "url(#glow)" : ""} />
                           <circle r="6" cx="0" cy="-15" fill="#10b981" filter={scanProgress > 95 ? "url(#glow)" : ""} />
@@ -335,18 +338,6 @@ const InteractiveLab: React.FC = () => {
 
                   <text x="30" y="560" className="text-[11px] fill-stone-300 font-bold uppercase tracking-widest">Intracellular (Cytoplasm)</text>
                 </svg>
-
-                <div className="absolute top-6 left-1/2 -translate-x-1/2 px-12 py-5 bg-white border border-stone-100 rounded-3xl text-center shadow-2xl min-w-[400px]">
-                   <div className="text-[10px] font-bold text-indigo-500 uppercase tracking-[0.2em] mb-1.5">Simulation Control Log</div>
-                   <div className="text-xl font-extrabold text-stone-800">
-                      {scanProgress < 25 && "等待配体分子接近..."}
-                      {scanProgress >= 25 && scanProgress < 45 && "胰岛素结合并诱导构象改变"}
-                      {scanProgress >= 45 && scanProgress < 60 && "受体酪氨酸激酶自磷酸启动"}
-                      {scanProgress >= 60 && scanProgress < 85 && "胞内级联信号传播 (IRS/AKT)"}
-                      {scanProgress >= 85 && scanProgress < 95 && "GLUT4 蛋白载体向膜转运..."}
-                      {scanProgress >= 95 && "通路激活：载体嵌入，转运开启"}
-                   </div>
-                </div>
               </div>
             </div>
           )}
