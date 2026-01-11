@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import InteractiveExpert from './components/InteractiveExpert';
 import HistoryTimeline from './components/HistoryTimeline';
@@ -50,7 +49,7 @@ const App: React.FC = () => {
           </div>
           <div className="hidden md:flex space-x-12 text-sm font-black uppercase tracking-[0.2em] text-slate-500">
             <button onClick={() => scrollToSection('history')} className="hover:text-blue-600 transition-colors">历史</button>
-            <button onClick={() => scrollToSection('types')} className="hover:text-blue-600 transition-colors">药学</button>
+            <button onClick={() => scrollToSection('types')} className="hover:text-blue-600 transition-colors">图谱</button>
             <button onClick={() => scrollToSection('lab')} className="hover:text-blue-600 transition-colors">实验室</button>
             <button onClick={() => scrollToSection('expert')} className="hover:text-blue-600 transition-colors">咨询</button>
           </div>
@@ -91,7 +90,7 @@ const App: React.FC = () => {
                   <img 
                     src="https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&q=80&w=1000" 
                     alt="Digital Medical Scan" 
-                    className="rounded-[3.5rem] w-full h-[550px] object-cover"
+                    className="rounded-[3.5rem] w-full h-[550px] object-cover bg-slate-100"
                   />
                   <div className="absolute top-12 -left-12 bg-white p-6 rounded-3xl border border-slate-100 float shadow-xl">
                     <div className="text-blue-600 font-black text-3xl mb-1">51</div>
@@ -154,9 +153,6 @@ const App: React.FC = () => {
             <button onClick={() => scrollToSection('history')} className="hover:text-blue-600 transition-colors">History</button>
             <button onClick={() => scrollToSection('lab')} className="hover:text-blue-600 transition-colors">Laboratory</button>
             <button onClick={() => scrollToSection('expert')} className="hover:text-blue-600 transition-colors">Expert</button>
-          </div>
-          <div className="mt-16 pt-12 border-t border-slate-100 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-            &copy; 2024 DIGITAL PHARMACY COMMUNICATION LAB. ALL RIGHTS RESERVED.
           </div>
         </div>
       </footer>
