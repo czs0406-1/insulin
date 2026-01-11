@@ -39,38 +39,14 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .float {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        .pulse-border {
-            animation: pulse-border 2s infinite;
-        }
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
         }
     </style>
@@ -87,7 +63,7 @@
 }
 </script>
 </head>
-<body class="text-slate-100 leading-relaxed">
+<body class="text-slate-100 leading-relaxed bg-[#020617]">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>

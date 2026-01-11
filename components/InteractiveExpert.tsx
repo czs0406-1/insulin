@@ -4,7 +4,6 @@ import { EXPERT_KNOWLEDGE } from '../constants';
 import { getGeminiResponse } from '../services/geminiService';
 
 const InteractiveExpert: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState('storage');
   const [personality, setPersonality] = useState<'mentor' | 'friend'>('mentor');
   const [userInput, setUserInput] = useState('');
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'ai', content: string, citation?: string}[]>([
@@ -19,7 +18,10 @@ const InteractiveExpert: React.FC = () => {
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   }, [chatHistory, isTyping]);
 
@@ -28,7 +30,7 @@ const InteractiveExpert: React.FC = () => {
     
     setChatHistory(prev => [...prev, { role: 'user', content: question }]);
     setIsTyping(true);
-    setTypingStatus('正在检索知识库...');
+    setTypingStatus('正在调取知识库...');
 
     if (predefinedAnswer) {
       setTimeout(() => {
@@ -39,19 +41,19 @@ const InteractiveExpert: React.FC = () => {
           content: prefix + predefinedAnswer,
           citation: citation
         }]);
-      }, 800);
+      }, 1000);
     } else {
-      setTypingStatus('AI 专家正在深度思考...');
+      setTypingStatus('AI 专家深度思考中...');
       try {
         const response = await getGeminiResponse(question);
         setIsTyping(false);
         setChatHistory(prev => [...prev, { 
           role: 'ai', 
-          content: response || "抱歉，服务暂时不可用。建议您咨询临床医师获取专业指导。" 
+          content: response || "抱歉，由于算力调度问题，暂时无法生成回答。请务必咨询您的临床医师。" 
         }]);
       } catch (err) {
         setIsTyping(false);
-        setChatHistory(prev => [...prev, { role: 'ai', content: "网络链路异常，请稍后再试，并务必谨遵医嘱。" }]);
+        setChatHistory(prev => [...prev, { role: 'ai', content: "系统连接受限。如有紧急用药疑问，请咨询专业医师。" }]);
       }
     }
   };
@@ -59,114 +61,98 @@ const InteractiveExpert: React.FC = () => {
   const handleSend = () => {
     const text = userInput;
     if (!text.trim()) return;
-    setUserInput(''); // 立即清理，防止重复发送
+    setUserInput('');
     processResponse(text);
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto glass rounded-[3.5rem] border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col lg:flex-row h-[880px]">
+    <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row h-[800px] rounded-[2.5rem] overflow-hidden bg-[#0a0f25] border border-white/5 shadow-2xl">
       
-      {/* 极客侧边栏 */}
-      <div className="lg:w-[320px] bg-slate-900/80 border-r border-white/10 p-8 flex flex-col relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-transparent opacity-50"></div>
-        
-        {/* 数字人视觉区域 */}
-        <div className="relative w-40 h-40 mx-auto mb-8 group mt-6">
-          <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-2xl animate-pulse"></div>
-          <div className="relative w-full h-full border-2 border-blue-500/20 rounded-full flex items-center justify-center p-2">
-            <div className="w-full h-full bg-slate-800 rounded-full flex items-center justify-center overflow-hidden relative shadow-inner">
-               <svg viewBox="0 0 24 24" className={`w-24 h-24 text-blue-500/70 transition-all duration-700 ${isTyping ? 'scale-110 opacity-100 rotate-3' : 'scale-100 opacity-40'}`} fill="currentColor">
+      {/* 侧边栏：数字人面板 */}
+      <aside className="lg:w-72 bg-[#0d122b] border-r border-white/5 flex flex-col items-center p-8">
+        <div className="relative mb-8 group">
+          <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-2xl group-hover:bg-cyan-500/30 transition-all"></div>
+          <div className="relative w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-cyan-500/50 to-blue-500/50">
+            <div className="w-full h-full rounded-full bg-[#111835] flex items-center justify-center overflow-hidden">
+              <svg viewBox="0 0 24 24" className={`w-16 h-16 text-cyan-400/80 transition-all duration-700 ${isTyping ? 'scale-110' : 'scale-100'}`} fill="currentColor">
                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-               </svg>
-               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent h-full w-full animate-[scan_4s_linear_infinite]"></div>
+              </svg>
+              {isTyping && <div className="absolute inset-0 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>}
             </div>
           </div>
-          <div className="absolute bottom-2 right-4 w-4 h-4 bg-green-500 rounded-full border-4 border-slate-900 shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div>
+          <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-[#0d122b] rounded-full"></div>
         </div>
 
-        <div className="text-center mb-8">
-          <h3 className="text-lg font-black text-white mb-1 tracking-tighter uppercase">Pharmacist AI Core</h3>
-          <p className="text-[9px] text-slate-600 font-bold tracking-[0.4em] uppercase">Status: Connected</p>
+        <div className="text-center mb-10">
+          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">Pharmacist AI</h3>
+          <p className="text-[10px] text-cyan-500/60 font-bold uppercase tracking-widest">Digital Mentor</p>
         </div>
 
-        {/* 交互模式切换 */}
-        <div className="bg-black/40 p-1 rounded-2xl border border-white/5 flex mb-8">
-           <button 
+        <nav className="w-full space-y-2 mb-10">
+          <button 
             onClick={() => setPersonality('mentor')}
-            className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${personality === 'mentor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-600 hover:text-slate-400'}`}
-           >
-             专家模式
-           </button>
-           <button 
+            className={`w-full py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 ${personality === 'mentor' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-900/40' : 'text-slate-500 hover:bg-white/5'}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${personality === 'mentor' ? 'bg-white' : 'bg-slate-700'}`}></span>
+            专家模式
+          </button>
+          <button 
             onClick={() => setPersonality('friend')}
-            className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${personality === 'friend' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-600 hover:text-slate-400'}`}
-           >
-             助手模式
-           </button>
-        </div>
+            className={`w-full py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-left flex items-center gap-3 ${personality === 'friend' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' : 'text-slate-500 hover:bg-white/5'}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${personality === 'friend' ? 'bg-white' : 'bg-slate-700'}`}></span>
+            助手模式
+          </button>
+        </nav>
 
-        {/* 侧边风险警告卡片 */}
-        <div className="mt-auto p-5 bg-amber-500/10 border border-amber-500/30 rounded-3xl relative overflow-hidden group">
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3 text-amber-500">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-              <span className="text-[10px] font-black uppercase tracking-widest">药学安全提醒</span>
-            </div>
-            <p className="text-[11px] text-slate-400 leading-relaxed font-bold">
-              AI 专家回复仅供科普。临床治疗具有极强个体差异，<span className="text-amber-500 uppercase">严禁自行调药或停药</span>，请咨询您的主治医师。
-            </p>
-          </div>
+        <div className="mt-auto bg-amber-500/5 border border-amber-500/20 p-4 rounded-2xl">
+           <div className="flex items-center gap-2 mb-2 text-amber-500">
+             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+             <span className="text-[9px] font-black uppercase tracking-widest">安全警示</span>
+           </div>
+           <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+             科普回复不具处方效力。所有治疗变更须由主治医师决定。
+           </p>
         </div>
-      </div>
+      </aside>
 
-      {/* 主对话区 */}
-      <div className="flex-1 flex flex-col bg-[#03081a] relative">
-        
-        {/* 顶部安全红线 Bar */}
-        <div className="bg-red-500/10 px-8 py-4 border-b border-red-500/20 flex items-center justify-between">
-           <div className="flex items-center gap-4">
-             <div className="relative">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping absolute inset-0"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-red-600 relative shadow-[0_0_10px_rgba(220,38,38,0.8)]"></div>
-             </div>
-             <span className="text-xs font-black text-red-400 tracking-[0.1em] uppercase">
-                安全准则：胰岛素属于高风险药物，请严格遵循医师医嘱使用
+      {/* 主工作区 */}
+      <main className="flex-1 flex flex-col bg-[#0b1029]">
+        {/* 顶部警告吸顶条 */}
+        <header className="px-8 py-3 bg-red-500/5 border-b border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
              </span>
-           </div>
-           <div className="flex items-center gap-2">
-             <span className="px-3 py-1 bg-red-500/20 text-red-500 border border-red-500/30 text-[9px] font-black rounded-lg uppercase tracking-widest">遵医嘱</span>
-           </div>
-        </div>
+             <span className="text-[10px] font-black text-red-500/80 uppercase tracking-widest">
+                核心准则：胰岛素使用必须严格遵医嘱
+             </span>
+          </div>
+          <span className="text-[8px] font-bold text-slate-700 uppercase tracking-[0.3em]">AI-PHARMACY CORE v2.5.2</span>
+        </header>
 
-        {/* 消息流 */}
+        {/* 聊天内容区 */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-6">
-          {chatHistory.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in`}>
-              <div className={`max-w-[85%] group ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`p-5 rounded-3xl text-sm leading-relaxed font-medium shadow-xl relative ${
+          {chatHistory.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in`}>
+              <div className={`max-w-[80%] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
+                <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-lg ${
                   msg.role === 'user' 
-                    ? 'bg-blue-600 text-white rounded-tr-none' 
-                    : 'glass border-white/10 text-slate-300 rounded-tl-none backdrop-blur-3xl'
+                    ? 'bg-gradient-to-tr from-cyan-600 to-blue-600 text-white rounded-tr-none' 
+                    : 'bg-white/5 border border-white/10 text-slate-200 rounded-tl-none backdrop-blur-md'
                 }`}>
                   {msg.content}
-                  
-                  {msg.role === 'ai' && idx !== 0 && (
-                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between opacity-60">
-                      <div className="flex items-center gap-2">
-                        <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
-                        <span className="text-[9px] font-bold text-slate-500 tracking-widest uppercase italic">科普内容不作为处方建议</span>
-                      </div>
-                      <span className="text-[9px] text-amber-500/80 font-black">谨遵医嘱</span>
-                    </div>
-                  )}
                 </div>
                 {msg.citation && (
-                   <div className="mt-2 px-3 py-1 text-[9px] font-black text-slate-600 uppercase tracking-widest flex justify-between items-center w-full animate-in">
-                     <span>{msg.citation}</span>
-                     {msg.role === 'ai' && <span className="text-amber-600/80 font-black flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        咨询医师后再操作
-                     </span>}
+                  <div className="mt-2 flex items-center gap-2 opacity-50 px-1">
+                    <span className="text-[9px] font-black text-cyan-500 uppercase">Ref</span>
+                    <span className="text-[9px] font-medium text-slate-500">{msg.citation}</span>
+                  </div>
+                )}
+                {msg.role === 'ai' && i > 0 && (
+                   <div className="mt-2 px-1 text-[8px] font-black text-amber-500/60 uppercase italic tracking-widest">
+                     谨遵医嘱 · 非诊断建议
                    </div>
                 )}
               </div>
@@ -174,75 +160,65 @@ const InteractiveExpert: React.FC = () => {
           ))}
           {isTyping && (
             <div className="flex justify-start animate-pulse">
-              <div className="glass border-white/10 p-4 rounded-2xl rounded-tl-none">
-                <div className="flex items-center gap-3">
-                  <div className="flex space-x-1.5">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                  </div>
-                  <span className="text-[9px] font-black text-blue-400/60 uppercase tracking-widest">{typingStatus}</span>
-                </div>
+              <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tl-none flex items-center gap-3">
+                 <div className="flex gap-1">
+                   <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce"></div>
+                   <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                   <div className="w-1 h-1 bg-cyan-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                 </div>
+                 <span className="text-[10px] font-bold text-cyan-500/60 uppercase tracking-widest">{typingStatus}</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* 输入区与快捷问答 */}
-        <div className="p-8 border-t border-white/5 bg-slate-900/30">
-          <div className="flex overflow-x-auto gap-3 mb-6 scrollbar-hide pb-2">
+        {/* 交互输入区 */}
+        <footer className="p-8 pt-0">
+          {/* 快捷推荐问题 */}
+          <div className="flex gap-2 overflow-x-auto pb-6 scrollbar-hide no-scrollbar">
             {EXPERT_KNOWLEDGE.faqs.slice(0, 6).map((faq, i) => (
               <button 
                 key={i}
                 onClick={() => processResponse(faq.question, faq.answer, faq.citation)}
                 disabled={isTyping}
-                className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-slate-400 hover:bg-blue-600/20 hover:text-blue-400 transition-all whitespace-nowrap flex items-center gap-2 disabled:opacity-50"
+                className="whitespace-nowrap px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all disabled:opacity-50"
               >
-                <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
                 {faq.question}
               </button>
             ))}
           </div>
 
-          <div className="relative group">
-            <input 
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="向 AI 数字药学专家提问（如：如何预防低血糖？）"
-              disabled={isTyping}
-              className="w-full bg-black/50 border border-white/10 rounded-2xl py-5 pl-8 pr-36 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-inner disabled:opacity-50"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-              <button 
-                onClick={handleSend}
-                disabled={!userInput.trim() || isTyping}
-                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-30 disabled:hover:bg-blue-600 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-              >
-                发送
-              </button>
-            </div>
+          <div className="relative">
+             <input 
+               type="text"
+               value={userInput}
+               onChange={(e) => setUserInput(e.target.value)}
+               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+               placeholder="向数字专家提问（例如：低血糖该如何紧急处理？）"
+               disabled={isTyping}
+               className="w-full bg-[#111835] border border-white/10 rounded-2xl py-5 pl-8 pr-32 text-sm text-white focus:outline-none focus:border-cyan-500/50 focus:ring-4 focus:ring-cyan-500/5 transition-all placeholder:text-slate-600 disabled:opacity-50 shadow-inner"
+             />
+             <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <button 
+                  onClick={handleSend}
+                  disabled={!userInput.trim() || isTyping}
+                  className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-30 disabled:hover:bg-cyan-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-cyan-900/40"
+                >
+                  发送
+                </button>
+             </div>
           </div>
-          
-          <div className="mt-4 flex justify-center">
-            <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] flex items-center gap-2">
-              <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-              Pharmacist AI Core v2.5.1 Online
-              <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-            </p>
-          </div>
-        </div>
-      </div>
+        </footer>
+      </main>
 
       <style>{`
-        @keyframes scan {
-          0% { transform: translateY(-100%); opacity: 0; }
-          50% { opacity: 0.3; }
-          100% { transform: translateY(400%); opacity: 0; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .animate-in { animation: in 0.4s ease-out forwards; }
       `}</style>
     </div>
   );
